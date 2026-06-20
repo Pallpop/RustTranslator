@@ -12,7 +12,27 @@ on:
         type: string
 
 jobs:
+  tag:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --tags origin | grep -q "refs/tags/v${{ inputs.version }}$"; then
+            echo "Tag v${{ inputs.version }} already exists, skipping"
+          else
+            git tag v${{ inputs.version }}
+            git push origin v${{ inputs.version }}
+          fi
+
   build:
+    needs: [tag]
+    if: always() && (needs.tag.result == 'success' || needs.tag.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -32,18 +52,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-
-      - name: Create and push tag
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git ls-remote --tags origin | grep -q "refs/tags/v${{ inputs.version }}$"; then
-            echo "Tag v${{ inputs.version }} already exists, skipping"
-          else
-            git tag v${{ inputs.version }}
-            git push origin v${{ inputs.version }}
-          fi
 
       - uses: dtolnay/rust-toolchain@stable
         with:
