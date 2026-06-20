@@ -209,7 +209,7 @@ function renderGlossary() {
 
         // Click to toggle selection (supports Shift+click for range)
         item.addEventListener('click', (e) => {
-            if (e.target.closest('.item-actions') || e.target.closest('.copy-btn') || e.target.closest('.glossary-checkbox') || e.target.closest('.edit-input') || e.target.closest('.text-btn')) return;
+            if (e.target.closest('.item-actions') || e.target.closest('.copy-btn') || e.target.closest('.edit-input') || e.target.closest('.text-btn')) return;
 
             // Mark new term as seen
             if (newTermIds.has(entry.id)) {
@@ -233,22 +233,6 @@ function renderGlossary() {
                 selectedTermIds.add(entry.id);
             }
             lastClickedTermId = entry.id;
-            updateBatchActions();
-            renderGlossary();
-        });
-
-        // Checkbox
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'glossary-checkbox';
-        checkbox.checked = isSelected;
-        checkbox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (selectedTermIds.has(entry.id)) {
-                selectedTermIds.delete(entry.id);
-            } else {
-                selectedTermIds.add(entry.id);
-            }
             updateBatchActions();
             renderGlossary();
         });
@@ -336,7 +320,6 @@ function renderGlossary() {
             content.appendChild(targetRow);
         }
 
-        item.appendChild(checkbox);
         item.appendChild(content);
 
         // Action buttons (hidden during edit mode)

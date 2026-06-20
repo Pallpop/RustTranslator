@@ -419,13 +419,6 @@ body {
     background: rgba(255, 59, 48, 0.1);
 }
 
-.glossary-checkbox {
-    margin-top: 3px;
-    margin-right: 8px;
-    accent-color: var(--accent);
-    flex-shrink: 0;
-}
-
 .glossary-content {
     flex: 1;
     min-width: 0;
