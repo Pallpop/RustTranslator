@@ -23,7 +23,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List downloaded files
-        run: find . -type f \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.exe" \) | head -20
+        run: find . -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" \) | head -20
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -32,7 +32,6 @@ jobs:
           name: v${{ inputs.version }}
           files: |
             **/*.dmg
-            **/*.app
             **/*.msi
             **/*.exe
           draft: true

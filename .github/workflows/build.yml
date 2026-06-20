@@ -12,7 +12,7 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             platform: macos
-          - os: macos-latest
+          - os: macos-13
             target: x86_64-apple-darwin
             platform: macos
           - os: windows-latest
@@ -50,7 +50,6 @@ jobs:
           name: RustTranslator-${{ matrix.platform }}-${{ matrix.target }}
           path: |
             src-tauri/target/release/bundle/dmg/*.dmg
-            src-tauri/target/release/bundle/macos/*.app
 
       - name: Upload Windows artifacts
         if: matrix.platform == 'windows'
