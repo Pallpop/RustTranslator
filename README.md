@@ -68,3 +68,13 @@ RustTranslator/
 2. 复制文本后会自动翻译
 3. 可在顶部切换项目，每个项目有独立的术语表
 4. 非默认项目可自定义翻译 Prompt
+
+## macOS 安装说明
+
+首次打开 DMG 安装包时，macOS 可能会提示 "RustTranslator is damaged and can't be opened"。这是 Gatekeeper 安全机制，因为应用未经 Apple 签名。
+
+解决方法：打开终端，运行以下命令后重新打开应用：
+
+```bash
+xattr -cr /Applications/RustTranslator.app
+```
