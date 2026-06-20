@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustTranslator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <div class="project-selector">
+                <button id="projectMenuBtn" class="project-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span id="currentProjectName">默认项目</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <div id="projectDropdown" class="dropdown hidden">
+                    <div id="projectList"></div>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="newProjectBtn">新建项目</button>
+                </div>
+            </div>
+            <div class="top-actions">
+                <button id="settingsBtn" class="icon-btn" title="设置">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+                <button id="editPromptBtn" class="icon-btn" title="编辑 Prompt" style="display:none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="translation-area" id="translationArea">
+            <div class="empty-state" id="emptyState">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <p>复制文本后自动翻译</p>
+            </div>
+            <div class="translating-state hidden" id="translatingState">
+                <div class="translating-header">
+                    <span class="label">原文</span>
+                </div>
+                <div class="text-block secondary" id="translatingOriginal"></div>
+                <div class="divider"></div>
+                <div class="translating-footer">
+                    <div class="spinner"></div>
+                    <span class="label">翻译中...</span>
+                    <button class="text-btn danger" id="cancelBtn">取消</button>
+                </div>
+            </div>
+            <div class="result-state hidden" id="resultState">
+                <div class="result-header">
+                    <span class="label">原文</span>
+                    <button class="copy-icon-btn" id="copyOriginalBtn" title="复制原文">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <div class="text-block secondary" id="resultOriginal"></div>
+                <div class="divider"></div>
+                <div class="result-header">
+                    <span class="label">译文</span>
+                    <button class="copy-icon-btn" id="copyTranslatedBtn" title="复制译文">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <div class="text-block" id="resultTranslated"></div>
+            </div>
+        </div>
+
+        <div class="glossary-section" id="glossarySection" style="display:none">
+            <div class="glossary-header" id="glossaryHeader">
+                <div class="glossary-title">
+                    <svg id="glossaryChevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                    <span>术语表</span>
+                </div>
+                <div class="glossary-actions">
+                    <button class="text-btn small" id="selectAllBtn" title="全选/取消全选">全选</button>
+                    <button class="icon-btn small danger hidden" id="batchDeleteBtn" title="删除选中">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn small" id="addTermBtn" title="添加术语">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn small" id="exportBtn" title="导出术语表">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </button>
+                    <span class="count" id="glossaryCount">0</span>
+                </div>
+            </div>
+            <div class="glossary-body" id="glossaryBody">
+                <div id="glossaryList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop" id="settingsBackdrop"></div>
+        <div class="modal-content">
+            <h3>翻译设置</h3>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="password" id="settingsApiKey" placeholder="sk-...">
+            </div>
+            <div class="form-group">
+                <label>Base URL</label>
+                <input type="text" id="settingsBaseUrl" placeholder="https://api.openai.com">
+            </div>
+            <div class="form-group">
+                <label>
+                    模型
+                    <span id="modelsLoading" class="hidden"><div class="spinner tiny"></div></span>
+                </label>
+                <select id="settingsModel">
+                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="settingsGlossaryEnabled" checked>
+                    <span>自动提取术语</span>
+                </label>
+            </div>
+            <p class="hint">支持 OpenAI 兼容格式的 API（如 OpenAI、DeepSeek、Moonshot 等）</p>
+            <div class="modal-actions">
+                <button class="btn primary" id="saveSettingsBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div id="newProjectModal" class="modal hidden">
+        <div class="modal-backdrop" id="newProjectBackdrop"></div>
+        <div class="modal-content">
+            <h3>新建翻译项目</h3>
+            <div class="form-group">
+                <input type="text" id="newProjectName" placeholder="项目名称">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelNewProjectBtn">取消</button>
+                <button class="btn primary" id="confirmNewProjectBtn">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Project Modal -->
+    <div id="renameModal" class="modal hidden">
+        <div class="modal-backdrop" id="renameBackdrop"></div>
+        <div class="modal-content">
+            <h3>重命名项目</h3>
+            <div class="form-group">
+                <input type="text" id="renameInput" placeholder="项目名称">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelRenameBtn">取消</button>
+                <button class="btn primary" id="confirmRenameBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Editor Modal -->
+    <div id="promptModal" class="modal hidden">
+        <div class="modal-backdrop" id="promptBackdrop"></div>
+        <div class="modal-content">
+            <h3>编辑翻译 Prompt</h3>
+            <div class="form-group">
+                <textarea id="promptInput" rows="6" placeholder="输入自定义翻译指引..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelPromptBtn">取消</button>
+                <button class="btn primary" id="savePromptBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Term Modal -->
+    <div id="addTermModal" class="modal hidden">
+        <div class="modal-backdrop" id="addTermBackdrop"></div>
+        <div class="modal-content">
+            <h3>添加术语</h3>
+            <div class="form-group">
+                <label>原文</label>
+                <input type="text" id="termSource" placeholder="英文术语">
+            </div>
+            <div class="form-group">
+                <label>译文</label>
+                <input type="text" id="termTarget" placeholder="中文译文">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelAddTermBtn">取消</button>
+                <button class="btn primary" id="confirmAddTermBtn">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-backdrop" id="deleteBackdrop"></div>
+        <div class="modal-content">
+            <h3>确认删除项目</h3>
+            <p id="deleteMessage">确定要删除项目吗？此操作不可撤销。</p>
+            <div class="modal-actions">
+                <button class="btn" id="cancelDeleteBtn">取消</button>
+                <button class="btn danger" id="confirmDeleteBtn">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
